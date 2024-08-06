@@ -9,7 +9,7 @@
 # ------------------------------- Main source started -------------------------------
 #
 # Modify default theme（FROM uci-theme-bootstrap CHANGE TO luci-theme-material）
-# sed -i 's/luci-theme-bootstrap/luci-theme-material/g' ./feeds/luci/collections/luci/Makefile
+sed -i 's/luci-theme-argon/g' ./feeds/luci/collections/luci/Makefile
 
 # Add autocore support for armvirt
 sed -i 's/TARGET_rockchip/TARGET_rockchip\|\|TARGET_armvirt/g' package/lean/autocore/Makefile
@@ -38,10 +38,8 @@ sed -i 's|root::0:0:99999:7:::|root:$6$abc123$zYX1z9A6TLP63a7s3O.VziPU5y6WbbM.Xg
 # SSID
 sed -i "s/lede-master/JOE-WRT/g" package/kernel/mac80211/files/lib/wifi/mac80211.sh
 
-sed -i "s/+luci-theme-material //" feeds/luci/collections/luci/Makefile
-
-rm -rf ./package/emortal/default-settings/files/openwrt_banner
-svn export https://github.com/jauharimtikhan/openwrt/trunk/banner package/emortal/default-settings/files/openwrt_banner
+rm -rf ./package/lede-master/default-settings/files/openwrt_banner
+svn export https://github.com/jauharimtikhan/openwrt/blob/main/banner package/lede-master/default-settings/files/openwrt_banner
 
 
 mkdir -p files/etc/openclash/core
