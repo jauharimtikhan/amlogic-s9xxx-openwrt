@@ -74,10 +74,6 @@ sed -i '94 i\	entry({"admin", "services", "openclash", "editor"}, template("open
 mkdir -p files/bin
 wget -qO- https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-aarch64.tgz | tar xOvz > files/bin/speedtest
 chmod +x files/bin/speedtest
-
-
-
-sed -i -e "\$i usbmuxd" /etc/rc.local
 # Apply patch
 # git apply ../config/patches/{0001*,0002*}.patch --directory=feeds/luci
 #
