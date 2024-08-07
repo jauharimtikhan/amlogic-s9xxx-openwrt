@@ -38,9 +38,8 @@ sed -i 's|root::0:0:99999:7:::|root:$6$abc123$zYX1z9A6TLP63a7s3O.VziPU5y6WbbM.Xg
 # SSID
 sed -i "s/lede-master/JOE-WRT/g" package/kernel/mac80211/files/lib/wifi/mac80211.sh
 
-rm -rf ./package/lede-master/default-settings/files/openwrt_banner
-svn export https://github.com/jauharimtikhan/amlogic-s9xxx-openwrt/blob/main/config/lede-master/banner package/lede-master/default-settings/files/openwrt_banner
-
+BANNER_URL="https://raw.githubusercontent.com/jauharimtikhan/openwrt/main/banner"
+curl -s $BANNER_URL -o package/lede-master/default-settings/files/openwrt_banner
 
 
 # speedtest
