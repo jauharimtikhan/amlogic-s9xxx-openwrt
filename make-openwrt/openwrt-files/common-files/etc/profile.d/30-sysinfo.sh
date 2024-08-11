@@ -175,35 +175,23 @@ fi
 sys_tempx=$(echo ${sys_temp} | sed 's/ / /g')
 
 # display info
-machine_model=$(cat /proc/device-tree/model | tr -d "\000")
+machine_model=$("s905x | JOE-WRT" | tr -d "\000")
 printf " Device Model: \x1B[93m%s\x1B[0m" "${machine_model}"
 echo ""
-printf " Architecture: \x1B[93m%s\x1B[0m" "${sys_tempx}"
+printf " Architecture: \x1B[93m%s\x1B[0m" "STB HG680P"
 echo ""
 display " Load Average" "${load%% *}" "${critical_load}" "0" "" "${load#* }"
 printf "Uptime: \x1B[92m%s\x1B[0m" "${time}"
 echo ""
 
-display " Ambient Temp" "${cpu_tempx}" "80" "0" "" "°C"
+display "Temp" "${cpu_tempx}" "80" "0" "" "°C"
 if [[ -x "/usr/bin/cpustat" ]]; then
 	cpu_freq=$(/usr/bin/cpustat -F1500)
 	echo -n "CPU Freq: ${cpu_freq}"
 else
 	display "CPU Freq" "${cpu_freq}" "1500" "0" " Mhz" ""
 fi
-echo ""
 
-display " Memory Usage" "${memory_usage}" "70" "0" "%" " of ${memory_total}M"
-display "Swap Usage" "${swap_usage}" "80" "0" "%" " of ${swap_total}M"
 echo ""
-
-display " Boot Storage" "${boot_usage}" "90" "1" "%" " of ${boot_total}"
-display "ROOTFS" "${root_usage}" "90" "1" "%" " of ${root_total}"
-echo ""
-
-if [[ -d "${PARTITION_PATH}" ]]; then
-	display " Data Storage" "${data_usage}" "90" "0" "%" " of ${data_total}"
 	printf "IP Addr: \x1B[92m%s\x1B[0m" "${ip_address}"
-	echo ""
-fi
 echo "───────────────────────────────────────────────────────────────────────"
