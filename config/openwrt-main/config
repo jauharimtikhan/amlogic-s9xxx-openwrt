@@ -3344,7 +3344,7 @@ CONFIG_PACKAGE_perlbase-filehandle=y
 CONFIG_PACKAGE_perlbase-filetest=y
 CONFIG_PACKAGE_perlbase-filter=y
 CONFIG_PACKAGE_perlbase-findbin=y
-CONFIG_PACKAGE_perlbase-gdbm-file is not set
+CONFIG_PACKAGE_perlbase-gdbm-file=y
 CONFIG_PACKAGE_perlbase-getopt=y
 CONFIG_PACKAGE_perlbase-hash=y
 CONFIG_PACKAGE_perlbase-http-tiny=y
