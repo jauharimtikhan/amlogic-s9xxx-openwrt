@@ -84,114 +84,20 @@ function get_ip_addresses() {
 	echo "${ips[@]}"
 } # get_ip_addresses
 
-function storage_info() {
-	# storage info
-	RootInfo="$(df -h /)"
-	root_usage="$(awk '/\// {print $(NF-1)}' <<<${RootInfo} | sed 's/%//g')"
-	root_total="$(awk '/\// {print $(NF-4)}' <<<${RootInfo})"
 
-	# storage info
-	BootInfo="$(df -h /boot)"
-	boot_usage="$(awk '/\// {print $(NF-1)}' <<<${BootInfo} | sed 's/%//g')"
-	boot_total="$(awk '/\// {print $(NF-4)}' <<<${BootInfo})"
-
-	# Get the size of the extended partition
-	if [[ -d "${PARTITION_PATH}" ]]; then
-		PartInfo="$(df -h ${PARTITION_PATH})"
-		data_usage="$(awk '/\// {print $(NF-1)}' <<<${PartInfo} | sed 's/%//g')"
-		data_total="$(awk '/\// {print $(NF-4)}' <<<${PartInfo})"
-	fi
-}
-
-function get_data_storage() {
-	if which lsblk >/dev/null; then
-		root_name="$(lsblk -l -o NAME,MOUNTPOINT | awk '$2~/^\/$/ {print $1}')"
-		mmc_name="$(echo ${root_name} | awk '{print substr($1,1,length($1)-2);}')"
-		if echo ${mmc_name} | grep mmcblk >/dev/null; then
-			DATA_STORAGE="/mnt/${mmc_name}p4"
-		fi
-	fi
-}
 
 # query various systems and send some stuff to the background for overall faster execution.
 # Works only with ambienttemp and batteryinfo since A20 is slow enough :)
 ip_address="$(get_ip_addresses &)"
-get_data_storage
-storage_info
-critical_load="$((1 + $(grep -c processor /proc/cpuinfo) / 2))"
-
-# get uptime, logged in users and load in one take
-if [[ -x /usr/bin/cpustat ]]; then
-	time="$(/usr/bin/cpustat -u)"
-	load="$(/usr/bin/cpustat -l)"
-else
-	UptimeString=$(uptime | tr -d ',')
-	time="$(awk -F" " '{print $3" "$4}' <<<"${UptimeString}")"
-	load="$(awk -F"average: " '{print $2}' <<<"${UptimeString}")"
-	case "${time}" in
-	1:*) # 1-2 hours
-		time="$(awk -F" " '{print $3" h"}' <<<"${UptimeString}")"
-		;;
-	*:*) # 2-24 hours
-		time="$(awk -F" " '{print $3" h"}' <<<"${UptimeString}")"
-		;;
-	*day) # days
-		days="$(awk -F" " '{print $3"d"}' <<<"${UptimeString}")"
-		time="$(awk -F" " '{print $5}' <<<"${UptimeString}")"
-		time="${days} "$(awk -F":" '{print $1"h "$2"m"}' <<<"${time}")
-		;;
-	esac
-fi
-
-# memory
-mem_info="$(LC_ALL=C free -w 2>/dev/null | grep "^Mem" || LC_ALL=C free | grep "^Mem")"
-memory_usage="$(awk '{printf("%.0f",(($2-($4+$6))/$2) * 100)}' <<<${mem_info})"
-memory_total="$(awk '{printf("%d",$2/1024)}' <<<${mem_info})"
-
-# swap
-swap_info="$(free -m | sed -n '$p' | echo $(xargs))"
-swap_usage="$(awk '{printf("%d", $3/$2*100)}' <<<${swap_info} 2>/dev/null || echo 0)"
-swap_total="$(awk '{printf("%d", $2/1024)}' <<<${swap_info} 2>/dev/null || echo 0)"
-
-# cpu temp
-if grep -q "ipq40xx" "/etc/openwrt_release"; then
-	cpu_temp="$(sensors | grep -Eo '\+[0-9]+.+C' | sed ':a;N;$!ba;s/\n/ /g;s/+//g')"
-elif [[ -f "/sys/class/hwmon/hwmon0/temp1_input" ]]; then
-	cpu_temp="$(awk '{ printf("%.1f °C", $0 / 1000) }' /sys/class/hwmon/hwmon0/temp1_input)"
-elif [[ -f "/sys/class/thermal/thermal_zone0/temp" ]]; then
-	cpu_temp="$(awk '{ printf("%.1f °C", $0 / 1000) }' /sys/class/thermal/thermal_zone0/temp)"
-else
-	cpu_temp="50.0 °C"
-fi
-cpu_tempx="$(echo ${cpu_temp} | sed -e 's/°C//g' -e 's/[ ][ ]*//g')"
-[[ "$(echo ${cpu_tempx} | awk -F'.' '{print $1}' | wc -c)" -gt "3" ]] && cpu_tempx="${cpu_tempx:0:2}.0"
-
-# Architecture
-if [[ -x "/usr/bin/cpustat" ]]; then
-	sys_temp=$(/usr/bin/cpustat -A)
-else
-	sys_temp=$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq)
-fi
-sys_tempx=$(echo ${sys_temp} | sed 's/ / /g')
 
 # display info
 machine_model=$("s905x | JOE-WRT" | tr -d "\000")
-printf " Device Model: \x1B[93m%s\x1B[0m" "${machine_model}"
+printf "Device Model: \x1B[93m%s\x1B[0m" "${machine_model}"
 echo ""
-printf " Architecture: \x1B[93m%s\x1B[0m" "STB HG680P"
-echo ""
-display " Load Average" "${load%% *}" "${critical_load}" "0" "" "${load#* }"
-printf "Uptime: \x1B[92m%s\x1B[0m" "${time}"
-echo ""
-
-display "Temp" "${cpu_tempx}" "80" "0" "" "°C"
-if [[ -x "/usr/bin/cpustat" ]]; then
-	cpu_freq=$(/usr/bin/cpustat -F1500)
-	echo -n "CPU Freq: ${cpu_freq}"
-else
-	display "CPU Freq" "${cpu_freq}" "1500" "0" " Mhz" ""
-fi
+printf "Architecture: \x1B[93m%s\x1B[0m" "STB HG680P"
 
 echo ""
 	printf "IP Addr: \x1B[92m%s\x1B[0m" "${ip_address}"
+echo ""
+
 echo "───────────────────────────────────────────────────────────────────────"
